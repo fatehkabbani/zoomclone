@@ -1,7 +1,10 @@
 const express = require('express');
 const app = express();
-const server = require('http').Server(app);
-const io = require('socket.io')(server);
+const fs = require('fs');
+const server1 = require('http').Server(app);
+const io = require('socket.io')(server1);
+const https = require('https');
+const port = 3000;
 const { v4: uuidV4 } = require('uuid');
 app.set('view engine', 'ejs');
 app.use(express.static('public'));
@@ -19,5 +22,14 @@ io.on('connection', socket => {
             socket.to(roomId).emit('user-disconnected', userId)
         })
     })
-})
-server.listen(3000);
+});
+const httpsOptions = {
+    key: fs.readFileSync('./security/key.pem'),
+    cert: fs.readFileSync('./security/cert.pem')
+}
+const server = https.createServer(httpsOptions, app)
+    .listen(port , () =>{
+        console.log(`the port is: ${port}`);
+    });
+
+//peers
